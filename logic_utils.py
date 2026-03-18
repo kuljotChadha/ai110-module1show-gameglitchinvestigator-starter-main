@@ -1,4 +1,7 @@
-def get_range_for_difficulty(difficulty: str) -> tuple[int, int]:
+from typing import Tuple, Optional, Union
+
+
+def get_range_for_difficulty(difficulty: str) -> Tuple[int, int]:
     """
     Return the inclusive range (low, high) for a given difficulty level.
 
@@ -25,7 +28,7 @@ def get_range_for_difficulty(difficulty: str) -> tuple[int, int]:
     return 1, 50
 
 
-def parse_guess(raw: str) -> tuple[bool, int | None, str | None]:
+def parse_guess(raw: str) -> Tuple[bool, Optional[int], Optional[str]]:
     """
     Parse a raw string input into a validated integer guess.
 
@@ -59,7 +62,7 @@ def parse_guess(raw: str) -> tuple[bool, int | None, str | None]:
     return True, value, None
 
 
-def check_guess(guess: int, secret: int) -> tuple[str, str]:
+def check_guess(guess: int, secret: int) -> Tuple[str, str]:
     """
     Compare a guess against the secret number and return outcome with message.
 
