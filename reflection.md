@@ -17,7 +17,11 @@ When I first ran the game, it looked like it was working and nothing appeared to
 - Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
 - Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
 
-I mainly used Copilot inside the IDE while working on the project. One helpful suggestion was that the game could not restart correctly because the status was not reset back to playing when initializing a new game. After reviewing the code, I confirmed that this was true and applied the suggested fix, and the bug was resolved when I ran the app again. However, one suggestion from AI was misleading: it suggested that the guess value was being compared as text instead of an integer. After checking the code, I verified that the guess was already being parsed to an integer, so that suggestion was not the real problem.
+I used GitHub Copilot throughout the project for code generation and debugging assistance. A genuinely helpful suggestion: Copilot identified that the session state wasn't being initialized properly for the game reset. It suggested moving all game variables into `st.session_state` and implementing a `reset_game()` function that properly clears attempts, history, and score. I verified this by manually testing the "New Game" button behavior, and confirmed the game fully reset as expected. 
+
+However, Copilot made a misleading suggestion early on: when I showed it the initial test failures, it claimed the issue was "guess values being compared as text instead of integers." I checked the actual code and found `parse_guess()` was already correctly converting strings to integers using `int(raw.strip())`. The real problem was the tests were comparing the entire tuple `(outcome, message)` to just a string like `"Win"`. Copilot had misdiagnosed the root cause, wasting time on a non-problem. This taught me to always verify AI suggestions by reading the actual code first rather than taking the explanation at face value.
+
+Additionally, when Copilot generated the initial error message "That is not a valid whole number," I had to override this to just "That is not a number." to match the test specifications. The AI was adding unnecessary verbosity. These experiences showed me that AI is best used as a starting point that requires human judgment and verification.
 
 ## 3. Debugging and testing your fixes
 
@@ -26,7 +30,7 @@ I mainly used Copilot inside the IDE while working on the project. One helpful s
   and what it showed you about your code.
 - Did AI help you design or understand any tests? How?
 
-I used two methods to confirm whether a bug was fixed. First, I manually tested the app by trying guesses that were too high, too low, and correct. I also ran pytest to check the logic functions. For example, I tested check_guess(50, 50) and verified it returned "Win" and "Correct!", and tested check_guess(60, 50) which correctly returned "Too High" and "Go LOWER!". Running pytest and seeing that all tests passed helped confirm that the logic was working as expected.
+I used a combination of manual testing and pytest to verify fixes, and I specifically looked for whether the test output matched the actual behavior I saw. When I first ran pytest on the test file, all three tests failed with `AssertionError: assert ('Win', '🎉 Correct!') == 'Win'`. This told me the tests were comparing a tuple to a string—not an AI misdiagnosis, but a clear signal from the test output itself. I fixed the tests to check `result[0]` for the outcome component. Later, when implementing the `parse_guess()` function, I tested edge cases like `"Infinity"` which caused an OverflowError. The pytest output told me exactly what was failing, and I had to add `OverflowError` to the exception handling even though Copilot's initial suggestion only caught `ValueError`. I also manually played through the game to verify the hint messages were correct—I guessed 60 when the secret was 50 and confirmed the app said "Go LOWER!" as expected. The comprehensive test suite I built (42 tests) acts as a safety net that catches regressions if I change the code later.
 
 ## 4. What did you learn about Streamlit and state?
 
@@ -43,7 +47,9 @@ I learned that Streamlit reruns the entire script every time the user interacts 
 - What is one thing you would do differently next time you work with AI on a coding task?
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
 
-One important habit I want to continue using is testing the logic and fixing one problem at a time. Running tests and checking the behavior helped me confirm whether each fix actually worked. I also learned that AI can be helpful for debugging and explaining code, but it is important to review and verify the suggestions. AI-generated code can be powerful when used properly, but it still requires careful checking to make sure it is correct.
+One critical habit I'm adopting is the "test-driven debugging" approach: write a failing test first, then trace the actual code to understand what's really happening rather than blindly accepting AI explanations. When I relied on Copilot's diagnosis instead of reading the test output carefully, I wasted time. But when I ran pytest with the actual error messages and traced through the code myself, I quickly found the real issues. For future AI collaborations, I'll establish a rule: always ask the AI to explain the code it suggests, then verify that explanation by reading and understanding the actual implementation myself.
+
+Next time working with AI, I'll be more skeptical of high-level diagnoses and ask for more specific, code-level explanations with exact line numbers and variable names. AI-generated code is excellent at providing working implementations when given clear specifications, but it excels much less at root-cause debugging. The key is using AI for what it does best (generating boilerplate, suggesting patterns) while reserving critical debugging and verification for myself.
 
 ## 6. AI Model Comparison (Stretch Feature)
 
