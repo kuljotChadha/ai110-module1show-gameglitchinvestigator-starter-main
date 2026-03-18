@@ -25,9 +25,9 @@ def parse_guess(raw: str):
         return False, None, "Enter a guess."
 
     try:
-        value = int(raw.strip())
+        value = int(float(raw.strip()))
     except ValueError:
-        return False, None, "That is not a valid whole number."
+        return False, None, "That is not a number."
 
     return True, value, None
 
@@ -42,10 +42,10 @@ def check_guess(guess, secret):
     # raise NotImplementedError("Refactor this function from app.py into logic_utils.py")
 
     if guess == secret:
-        return "Win", "🎉 Correct!"
+        return "Win", "Correct!"
     if guess > secret:
-        return "Too High", "📉 Too high. Try a lower number."
-    return "Too Low", "📈 Too low. Try a higher number."
+        return "Too High", "Go LOWER!"
+    return "Too Low", "Go HIGHER!"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -54,10 +54,16 @@ def update_score(current_score: int, outcome: str, attempt_number: int):
     # raise NotImplementedError("Refactor this function from app.py into logic_utils.py")
 
     if outcome == "Win":
-        points = max(100 - (attempt_number - 1) * 10, 10)
+        points = max(100 - 10 * (attempt_number + 1), 10)
         return current_score + points
 
-    if outcome in ("Too High", "Too Low"):
+    if outcome == "Too High":
+        if attempt_number % 2 == 0:
+            return current_score + 5
+        else:
+            return max(current_score - 5, 0)
+
+    if outcome == "Too Low":
         return max(current_score - 5, 0)
 
     return current_score
