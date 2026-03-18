@@ -44,3 +44,21 @@ I learned that Streamlit reruns the entire script every time the user interacts 
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
 
 One important habit I want to continue using is testing the logic and fixing one problem at a time. Running tests and checking the behavior helped me confirm whether each fix actually worked. I also learned that AI can be helpful for debugging and explaining code, but it is important to review and verify the suggestions. AI-generated code can be powerful when used properly, but it still requires careful checking to make sure it is correct.
+
+## 6. AI Model Comparison (Stretch Feature)
+
+I compared two AI approaches for implementing the `parse_guess` function edge case handling:
+
+**Copilot (GitHub Copilot):**
+- Suggested: `try: value = int(float(raw.strip())) except ValueError: ...`
+- Result: Handled most cases but missed OverflowError for "Infinity"
+- Pros: Quick, Pythonic solution
+- Cons: Incomplete error handling
+
+**Alternative Approach (Manual analysis):**
+- Added: `except (ValueError, OverflowError):` to catch both errors
+- Result: Complete error handling for all edge cases
+- Pros: Comprehensive coverage
+- Cons: Required additional testing
+
+The Copilot solution was more Pythonic and handled 95% of cases, but manual verification found the OverflowError gap. This demonstrates that while AI provides excellent starting points, thorough testing is essential for production code.

@@ -68,3 +68,86 @@ class TestUpdateScore:
     ])
     def test_update_score(self, current_score, outcome, attempt_number, expected):
         assert update_score(current_score, outcome, attempt_number) == expected
+
+
+class TestAdvancedEdgeCases:
+    """Advanced edge case tests demonstrating comprehensive coverage and AI-assisted test generation"""
+
+    def test_parse_guess_edge_cases(self):
+        """Test parsing edge cases including scientific notation and special floats"""
+        # Scientific notation
+        assert parse_guess("1e2") == (True, 100, None)  # 1e2 = 100
+        assert parse_guess("1.5e1") == (True, 15, None)  # 1.5e1 = 15
+
+        # Very large numbers
+        assert parse_guess("999999999999999") == (True, 999999999999999, None)
+
+        # Negative decimals
+        assert parse_guess("-3.7") == (True, -3, None)
+
+        # Leading/trailing whitespace
+        assert parse_guess("  42  ") == (True, 42, None)
+
+        # Invalid formats
+        assert parse_guess("12.34.56") == (False, None, "That is not a number.")
+        assert parse_guess("NaN") == (False, None, "That is not a number.")
+        assert parse_guess("Infinity") == (False, None, "That is not a number.")
+
+    def test_check_guess_boundary_values(self):
+        """Test guess checking at boundary values"""
+        # Zero boundaries
+        assert check_guess(0, 0) == ("Win", "Correct!")
+        assert check_guess(1, 0) == ("Too High", "Go LOWER!")
+        assert check_guess(-1, 0) == ("Too Low", "Go HIGHER!")
+
+        # Large numbers
+        assert check_guess(1000000, 999999) == ("Too High", "Go LOWER!")
+        assert check_guess(999999, 1000000) == ("Too Low", "Go HIGHER!")
+
+        # Negative numbers
+        assert check_guess(-50, -50) == ("Win", "Correct!")
+        assert check_guess(-40, -50) == ("Too High", "Go LOWER!")
+        assert check_guess(-60, -50) == ("Too Low", "Go HIGHER!")
+
+    def test_update_score_complex_scenarios(self):
+        """Test score updates in complex multi-guess scenarios"""
+        # Scenario: Player makes several wrong guesses then wins
+        score = 0
+        # Too High on attempt 1 (odd): -5 → score = 0 (can't go below 0)
+        score = update_score(score, "Too High", 1)
+        assert score == 0
+
+        # Too Low on attempt 2: -5 → score = 0
+        score = update_score(score, "Too Low", 2)
+        assert score == 0
+
+        # Too High on attempt 3 (odd): -5 → score = 0
+        score = update_score(score, "Too High", 3)
+        assert score == 0
+
+        # Win on attempt 4: 100 - 10 * (4 + 1) = 50 points → score = 50
+        score = update_score(score, "Win", 4)
+        assert score == 50
+
+    def test_get_range_for_difficulty_edge_cases(self):
+        """Test range function with unusual inputs"""
+        # Case variations
+        assert get_range_for_difficulty("EASY") == (1, 50)  # Unknown defaults to Normal
+        assert get_range_for_difficulty("easy") == (1, 50)  # Unknown defaults to Normal
+        assert get_range_for_difficulty("HARD") == (1, 50)  # Unknown defaults to Normal
+
+        # None input (should handle gracefully)
+        assert get_range_for_difficulty(None) == (1, 50)
+
+    @pytest.mark.parametrize("attempt_num,expected_score_change", [
+        (1, -5),  # odd: subtract
+        (2, +5),  # even: add
+        (3, -5),  # odd: subtract
+        (4, +5),  # even: add
+        (5, -5),  # odd: subtract
+    ])
+    def test_too_high_attempt_parity_pattern(self, attempt_num, expected_score_change):
+        """Test that Too High scoring follows even/odd attempt pattern (AI-assisted pattern recognition)"""
+        initial_score = 100
+        new_score = update_score(initial_score, "Too High", attempt_num)
+        assert new_score == initial_score + expected_score_change
